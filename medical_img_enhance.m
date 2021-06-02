@@ -22,7 +22,7 @@ function varargout = medical_img_enhance(varargin)
 
 % Edit the above text to modify the response to help medical_img_enhance
 
-% Last Modified by GUIDE v2.5 28-May-2021 00:01:17
+% Last Modified by GUIDE v2.5 02-Jun-2016 20:46:37
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -74,7 +74,7 @@ varargout{1} = handles.output;
 
 
 % --- Executes on button press in pushbutton1.
-function pushbutton1_Callback(hObject, eventdata, handles)
+function pushbutton1_Callback(hObject, eventdata, handles) %source code pilih image
 % hObject    handle to pushbutton1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -90,7 +90,6 @@ end
 
 
 % --- Executes on button press in pushbutton11.
-function pushbutton11_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton11 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -106,9 +105,8 @@ grid on
 
 
 
-
 % --- Executes on button press in pushbutton2.
-function pushbutton2_Callback(hObject, eventdata, handles)
+function pushbutton2_Callback(hObject, eventdata, handles) %source code crop image
 % hObject    handle to pushbutton2 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -144,14 +142,39 @@ imshow(hsl);
 
 
 % --- Executes on button press in pushbutton14.
-function pushbutton14_Callback(hObject, eventdata, handles)
+function pushbutton14_Callback(hObject, eventdata, handles) %source code deteksi tumor dan kanker
 % hObject    handle to pushbutton14 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+Img_gray = handles.Img_gray;
+axes(handles.axes8);
+bw = im2bw(Img_gray, 0.7);
+label = bwlabel(bw);
+
+stats = regionprops(label, 'solidity', 'Area');
+density = [stats.Solidity];
+area = [stats.Area];
+high_dense_area = density > 0.5;
+max_area = max(area(high_dense_area));
+tumor_label = find(area == max_area);
+tumor = ismember(label, tumor_label);
+
+se = strel('square', 5);
+tumor = imdilate(tumor, se)
+
+Bound = bwboundaries(tumor, 'noholes');
+
+imshow(Img_gray);
+hold on
+
+for i = 1: length(Bound)
+    plot(Bound{i} (:,2), Bound{i} (:,1), 'y', 'linewidth', 1.75)
+end
+
 
 
 % --- Executes on button press in pushbutton4.
-function pushbutton4_Callback(hObject, eventdata, handles)
+function pushbutton4_Callback(hObject, eventdata, handles) %source code simpan
 % hObject    handle to pushbutton4 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -163,7 +186,7 @@ imwrite(handles.hasil, fullfile(path_save, nama_file_save), 'BMP');
 
 
 % --- Executes on button press in pushbutton5.
-function pushbutton5_Callback(hObject, eventdata, handles)
+function pushbutton5_Callback(hObject, eventdata, handles) %source code buka kamera
 % hObject    handle to pushbutton5 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -179,7 +202,7 @@ guidata(hObject, handles);
 
 
 % --- Executes on button press in pushbutton8.
-function pushbutton8_Callback(hObject, eventdata, handles)
+function pushbutton8_Callback(hObject, eventdata, handles) %source code potret kamera
 % hObject    handle to pushbutton8 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -211,9 +234,9 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
-% --- Executes on button press in pushbutton10.
-function pushbutton10_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton10 (see GCBO)
+% --- Executes on button press in pushbutton20.
+function pushbutton20_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton20 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 c = handles.data1;
@@ -238,10 +261,9 @@ function pushbutton12_Callback(hObject, eventdata, handles)
 Img_gray = handles.Img_gray;
 
 
-
-% --- Executes on button press in pushbutton13.
-function pushbutton13_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton13 (see GCBO)
+% --- Executes on button press in pushbutton14.
+function pushbutton13_Callback(hObject, eventdata, handles) %source code CLAHE
+% hObject    handle to pushbutton14 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 Img_gray = handles.Img_gray;
@@ -253,3 +275,35 @@ imshow(Img_adapthisteq)
 axes(handles.axes7)
 imhist(Img_adapthisteq)
 grid on
+
+
+% --- Executes on button press in pushbutton10.
+% hObject    handle to pushbutton10 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+c = handles.data1;
+Img_gray = rgb2gray(c);
+axes(handles.axes2)
+imshow(Img_gray)
+ 
+axes(handles.axes3)
+imhist(Img_gray)
+title('Histogram')
+grid on
+ 
+handles.Img_gray = Img_gray;
+guidata(hObject, handles)
+
+
+% --- Executes on button press in pushbutton10.
+function pushbutton10_Callback(hObject, eventdata, handles) %source code grayscale
+% hObject    handle to pushbutton10 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in pushbutton11.
+function pushbutton11_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton11 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
